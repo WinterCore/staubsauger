@@ -21,13 +21,13 @@ fn preprocess_text(input: &str) -> String {
     return text;
 }
 
-fn build_corpus(text: &str) -> HashMap<&str, usize> {
-    let mut map: HashMap<&str, usize> = HashMap::new();
+fn build_corpus(text: &str) -> HashMap<String, usize> {
+    let mut map: HashMap<String, usize> = HashMap::new();
     
     let words = text.split(' ').collect::<Vec<&str>>();
 
     for word in words {
-        let entry = map.entry(word).or_insert(0);
+        let entry = map.entry(format!("{}_", word)).or_insert(0);
 
         *entry += 1;
     }
@@ -35,12 +35,31 @@ fn build_corpus(text: &str) -> HashMap<&str, usize> {
     return map;
 }
 
+fn get_pairs(vocab: &HashMap<String, usize>) -> HashMap<(char, char), usize> {
+    let mut pairs: HashMap<(char, char), usize> = HashMap::new();
+
+    for (word, freq) in vocab.into_iter() {
+        let chars = word.chars().collect::<Vec<char>>();
+        for i in 0..(word.len() - 1) {
+            let entry = pairs.entry((chars[i], chars[i + 1])).or_insert(0);
+            *entry += freq;
+        }
+    }
+
+    return pairs;
+}
+
+// fn get
+
+fn byte_pair_encode(vocab: &HashMap<String, usize>) -> HashMap<(char, char), usize> {
+}
+
 fn main() {
     let input = fs::read_to_string("./text.txt").expect("Should read text file");
 
     let text = preprocess_text(&input);
 
-    let freq_map = build_corpus(&text);
+    let vocab = build_corpus(&text);
 
-    println!("{:?}", freq_map);
+    println!("{:?}", byte_pair_encode(&vocab));
 }
